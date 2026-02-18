@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lời Tỏ Tình Khó Từ Chối</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-1: #ffe1b6;
+            --bg-2: #ffd1e8;
+            --bg-3: #bde7ff;
+            --ink: #2b1d1a;
+            --muted: #6b5f5c;
+            --ok: #1fbf9c;
+            --ok-deep: #13846d;
+            --no: #c4c8d1;
+            --no-deep: #8a94a7;
+            --card: rgba(255, 255, 255, 0.78);
+            --shadow: 0 24px 70px rgba(31, 31, 46, 0.18);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            font-family: "Space Grotesk", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(35vmax 28vmax at 10% 12%, rgba(255, 255, 255, 0.8), transparent 60%),
+                radial-gradient(28vmax 22vmax at 88% 10%, rgba(255, 255, 255, 0.65), transparent 65%),
+                linear-gradient(135deg, var(--bg-1), var(--bg-2) 45%, var(--bg-3));
+            overflow: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            width: 40vmax;
+            height: 40vmax;
+            border-radius: 50%;
+            filter: blur(30px);
+            opacity: 0.5;
+            z-index: 0;
+        }
+
+        body::before {
+            background: radial-gradient(circle, #ffe6f3 0%, transparent 70%);
+            top: -10vmax;
+            right: -8vmax;
+        }
+
+        body::after {
+            background: radial-gradient(circle, #d4f5ff 0%, transparent 70%);
+            bottom: -15vmax;
+            left: -10vmax;
+        }
+
+        body.stage-plea {
+            background:
+                radial-gradient(35vmax 28vmax at 15% 10%, rgba(255, 255, 255, 0.85), transparent 60%),
+                radial-gradient(30vmax 26vmax at 85% 18%, rgba(255, 245, 233, 0.8), transparent 70%),
+                linear-gradient(140deg, #ffd9a3, #ffbfbf 45%, #ffe6b8);
+        }
+
+        body.stage-sorry {
+            background:
+                radial-gradient(40vmax 30vmax at 12% 16%, rgba(255, 255, 255, 0.85), transparent 65%),
+                radial-gradient(30vmax 30vmax at 85% 12%, rgba(214, 244, 255, 0.75), transparent 70%),
+                linear-gradient(135deg, #bfe7ff, #ffd7ea 52%, #fff1c7);
+        }
+
+        .click-counter {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 0.45rem 0.9rem;
+            background: rgba(30, 20, 20, 0.55);
+            color: #fff;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            z-index: 2;
+            letter-spacing: 0.02em;
+        }
+
+        .card {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 3.5rem 3rem 3.2rem;
+            border-radius: 32px;
+            background: var(--card);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            max-width: 720px;
+            width: min(92vw, 720px);
+            transition: opacity 0.4s ease;
+        }
+
+        .card.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .question {
+            font-family: "Unbounded", "Space Grotesk", sans-serif;
+            font-size: clamp(2rem, 4vw, 3.4rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.2rem;
+        }
+
+        .subtext {
+            font-size: 1.05rem;
+            color: var(--muted);
+            margin-bottom: 2.2rem;
+        }
+
+        .special-message,
+        .disappear-message {
+            font-weight: 600;
+            font-size: 1.15rem;
+            margin: 0.4rem auto 1.6rem;
+            padding: 0.6rem 1rem;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.7);
+            display: none;
+            animation: pop 0.5s ease;
+            max-width: 520px;
+        }
+
+        .special-message.show,
+        .disappear-message.show {
+            display: inline-block;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 2.2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            padding: 0.95rem 2.1rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: "Unbounded", "Space Grotesk", sans-serif;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            box-shadow: 0 14px 30px rgba(28, 32, 44, 0.18);
+            touch-action: manipulation;
+            transform: scale(var(--scale, 1));
+        }
+
+        #okBtn {
+            background: linear-gradient(135deg, var(--ok), #2bd9b3);
+            color: #fff;
+            order: 1;
+        }
+
+        #okBtn:hover {
+            filter: brightness(1.05);
+            box-shadow: 0 18px 35px rgba(29, 143, 120, 0.35);
+        }
+
+        #okBtn.giant {
+            z-index: 2;
+        }
+
+        #noBtn {
+            background: linear-gradient(135deg, var(--no), #e2e8f0);
+            color: #32343b;
+            order: 2;
+        }
+
+        #noBtn:hover {
+            filter: brightness(0.96);
+        }
+
+        #noBtn.vanish {
+            opacity: 0;
+            transform: scale(0.2);
+            pointer-events: none;
+        }
+
+        .celebration {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background:
+                radial-gradient(50vmax 40vmax at 10% 10%, rgba(255, 255, 255, 0.5), transparent 60%),
+                linear-gradient(135deg, #ff8fb1, #ffc2a9 45%, #ffeaa7);
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .celebration.show {
+            display: flex;
+        }
+
+        .celebration h2 {
+            font-family: "Unbounded", "Space Grotesk", sans-serif;
+            font-size: clamp(2.4rem, 6vw, 4.5rem);
+            color: #fff;
+            text-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+        }
+
+        .celebration p {
+            margin-top: 0.8rem;
+            font-size: 1.3rem;
+            color: #fffdf8;
+        }
+
+        .float-item {
+            position: fixed;
+            font-size: 2rem;
+            pointer-events: none;
+            animation: float-up 3.2s ease-in forwards;
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-110vh) scale(0.2);
+            }
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0.6);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="click-counter">Lần bấm: <span id="clickCount">0</span></div>
+
+    <main class="card" id="mainCard">
+        <div class="question">Làm bạn gái anh nhé?</div>
+        <div class="subtext">Nói đồng ý đi, anh đợi câu trả lời này lâu lắm rồi đó.</div>
+
+        <div class="special-message" id="specialMessage" aria-live="polite"></div>
+        <div class="disappear-message" id="disappearMessage" aria-live="polite"></div>
+
+        <div class="button-row" id="buttonRow">
+            <button id="okBtn">OK</button>
+            <button id="noBtn">Không</button>
+        </div>
+    </main>
+
+    <section class="celebration" id="celebration">
+        <h2>Biết ngay mà!</h2>
+        <p>Hẹn em buổi hẹn đầu tiên thật xịn nhé.</p>
+    </section>
+
+    <script>
+        const okBtn = document.getElementById("okBtn");
+        const noBtn = document.getElementById("noBtn");
+        const buttonRow = document.getElementById("buttonRow");
+        const specialMessage = document.getElementById("specialMessage");
+        const disappearMessage = document.getElementById("disappearMessage");
+        const clickCountDisplay = document.getElementById("clickCount");
+        const celebration = document.getElementById("celebration");
+        const mainCard = document.getElementById("mainCard");
+
+        const stageMessages = {
+            5: { text: "Anh nài nỉ nha… cho anh một cơ hội nhé?", stage: "plea" },
+            8: { text: "Xin lỗi em, anh chỉ muốn em cười thôi mà.", stage: "sorry" }
+        };
+
+        let clickCount = 0;
+        let okScale = 1;
+        let noScale = 1;
+        let swapped = false;
+        let messageTimer = null;
+        let stageTimer = null;
+        let audioCtx = null;
+
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        function setScale(el, scale) {
+            el.style.setProperty("--scale", scale.toFixed(3));
+        }
+
+        function flashStage(stage) {
+            document.body.classList.add(`stage-${stage}`);
+            if (stageTimer) {
+                clearTimeout(stageTimer);
+            }
+            stageTimer = setTimeout(() => {
+                document.body.classList.remove(`stage-${stage}`);
+            }, 2200);
+        }
+
+        function showMessage(text) {
+            specialMessage.textContent = text;
+            specialMessage.classList.add("show");
+            if (messageTimer) {
+                clearTimeout(messageTimer);
+            }
+            messageTimer = setTimeout(() => {
+                specialMessage.classList.remove("show");
+            }, 2600);
+        }
+
+        function showDisappear(text) {
+            disappearMessage.textContent = text;
+            disappearMessage.classList.add("show");
+        }
+
+        function swapButtons() {
+            swapped = !swapped;
+            okBtn.style.order = swapped ? 2 : 1;
+            noBtn.style.order = swapped ? 1 : 2;
+            buttonRow.style.transition = "transform 0.2s ease";
+            buttonRow.style.transform = "scale(1.02)";
+            setTimeout(() => {
+                buttonRow.style.transform = "scale(1)";
+            }, 200);
+        }
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioCtx;
+        }
+
+        function playTone(freq, duration, type) {
+            const ctx = getAudioContext();
+            if (ctx.state === "suspended") {
+                ctx.resume();
+            }
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            oscillator.type = type;
+            oscillator.frequency.value = freq;
+            gainNode.gain.setValueAtTime(0.08, ctx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            oscillator.start(ctx.currentTime);
+            oscillator.stop(ctx.currentTime + duration);
+        }
+
+        function playGrowSound() {
+            playTone(880, 0.12, "sine");
+        }
+
+        function playShrinkSound() {
+            playTone(360, 0.16, "triangle");
+        }
+
+        function sprinkleHearts() {
+            const items = ["💖", "✨", "💗", "💞", "🌸"];
+            const count = prefersReducedMotion ? 14 : 36;
+            for (let i = 0; i < count; i += 1) {
+                const item = document.createElement("div");
+                item.className = "float-item";
+                item.textContent = items[Math.floor(Math.random() * items.length)];
+                item.style.left = `${Math.random() * 100}vw`;
+                item.style.top = "105vh";
+                item.style.fontSize = `${1.2 + Math.random() * 1.6}rem`;
+                item.style.animationDuration = `${2.4 + Math.random() * 1.8}s`;
+                document.body.appendChild(item);
+                setTimeout(() => item.remove(), 4200);
+            }
+        }
+
+        noBtn.addEventListener("click", () => {
+            if (clickCount >= 10) {
+                return;
+            }
+
+            clickCount += 1;
+            clickCountDisplay.textContent = clickCount;
+
+            const stageInfo = stageMessages[clickCount];
+            if (stageInfo) {
+                showMessage(stageInfo.text);
+                flashStage(stageInfo.stage);
+            }
+
+            if (clickCount <= 5) {
+                noScale *= 0.85;
+                okScale *= 1.2;
+                setScale(noBtn, noScale);
+                setScale(okBtn, okScale);
+                playShrinkSound();
+                playGrowSound();
+            }
+
+            if (clickCount >= 5 && clickCount < 10) {
+                swapButtons();
+            }
+
+            if (clickCount === 10) {
+                noBtn.classList.add("vanish");
+                okScale = Math.max(okScale, 4.2);
+                setScale(okBtn, okScale);
+                okBtn.classList.add("giant");
+                showDisappear("Bạn không có lựa chọn này đâu!");
+            }
+        });
+
+        okBtn.addEventListener("click", () => {
+            celebration.classList.add("show");
+            mainCard.classList.add("hide");
+            sprinkleHearts();
+            playTone(523, 0.18, "sine");
+            playTone(659, 0.2, "sine");
+            playTone(784, 0.24, "sine");
+        });
+    </script>
+</body>
+</html>
