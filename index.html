@@ -450,7 +450,7 @@
         button {
             border: none;
             min-width: 160px;
-            min-height: 100px;
+            min-height: 84px;
             padding: 0.55rem 1.2rem;
             --base-font-size: clamp(1.3rem, 1.5vw, 1.4rem);
             --font-scale: 1.3;
@@ -516,7 +516,7 @@
             background: linear-gradient(145deg, #ff6b58, #ef4a38);
             color: #fff;
             grid-column: 2;
-            --min-font-size: 1.2rem;
+            --min-font-size: 1rem;
             font-size: max(var(--min-font-size), calc(var(--base-font-size) * var(--font-scale)));
             box-shadow: 0 12px 20px rgba(213, 69, 54, 0.34);
             --no-x: 0px;
@@ -540,7 +540,7 @@
             left: 50%;
             top: 62%;
             transform: translate(calc(-50% + var(--no-x)), calc(-50% + var(--no-y))) rotate(var(--no-rot)) scale(var(--scale, 1));
-            transition: transform 0.28s cubic-bezier(0.2, 0.72, 0.18, 1), filter 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+            transition: filter 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
             will-change: transform;
             z-index: 4;
         }
@@ -809,9 +809,9 @@
 
         @media (max-width: 700px) {
             .card {
-                padding: 2.9rem 1.4rem 2.4rem;
+                padding: 2.2rem 1rem 1.9rem;
                 border-radius: 26px;
-                width: min(96vw, 96vw);
+                width: min(96vw, 520px);
             }
 
             .card::before {
@@ -820,29 +820,36 @@
             }
 
             .button-row {
-                width: min(96%, 96%);
-                min-height: 180px;
+                width: min(100%, 340px);
+                min-height: 148px;
+                gap: 0.5rem;
             }
 
             button {
-                min-width: 128px;
-                min-height: 60px;
-                --base-font-size: 0.9rem;
+                min-width: 122px;
+                min-height: 54px;
+                --base-font-size: 0.86rem;
+                --font-scale: 1;
             }
 
             #okBtn {
-                width: 128px;
-                height: 60px;
+                width: 122px;
+                height: 54px;
                 border-radius: 999px;
-                --base-font-size: clamp(1.25rem, 5.8vw, 1.8rem);
+                --base-font-size: clamp(1rem, 5.2vw, 1.35rem);
             }
 
             #noBtn {
-                width: 128px;
-                height: 60px;
-                --base-font-size: 0.92rem;
-                --min-font-size: 0.8rem;
+                width: 122px;
+                height: 54px;
+                --base-font-size: 0.84rem;
+                --min-font-size: 0.72rem;
                 --no-x: 0px;
+            }
+
+            .no-slot-ghost {
+                width: 122px;
+                height: 54px;
             }
 
             .floral-corner {
@@ -880,11 +887,15 @@
             }
 
             .card-view-thanks {
-                min-height: 320px;
+                min-height: 280px;
             }
 
             .thanks-gif {
                 width: min(100%, 240px);
+            }
+
+            .button-row.only-ok {
+                min-height: 220px;
             }
         }
 
@@ -1042,6 +1053,10 @@
         let firstInteractionDone = false;
         let noFloating = false;
         let noMoveStep = 0;
+        let noCurrentX = 0;
+        let noCurrentY = 0;
+        let noCurrentRot = 0;
+        let noMotionRaf = null;
 
         const customMusicSrc = "";
         const customMusic = customMusicSrc ? new Audio(customMusicSrc) : null;
@@ -1058,11 +1073,66 @@
             }
         }
 
+        function setNoPosition(x, y, rot) {
+            noCurrentX = x;
+            noCurrentY = y;
+            noCurrentRot = rot;
+            noBtn.style.setProperty("--no-x", `${x.toFixed(1)}px`);
+            noBtn.style.setProperty("--no-y", `${y.toFixed(1)}px`);
+            noBtn.style.setProperty("--no-rot", `${rot.toFixed(1)}deg`);
+        }
+
+        function animateNoTo(targetX, targetY, targetRot) {
+            if (prefersReducedMotion) {
+                setNoPosition(targetX, targetY, targetRot);
+                return;
+            }
+
+            if (noMotionRaf) {
+                cancelAnimationFrame(noMotionRaf);
+                noMotionRaf = null;
+            }
+
+            const startX = noCurrentX;
+            const startY = noCurrentY;
+            const startRot = noCurrentRot;
+            const start = performance.now();
+            const duration = 260;
+
+            const tick = (now) => {
+                const t = Math.min(1, (now - start) / duration);
+                const eased = 1 - Math.pow(1 - t, 3);
+
+                const x = startX + (targetX - startX) * eased;
+                const y = startY + (targetY - startY) * eased;
+                const rot = startRot + (targetRot - startRot) * eased;
+                setNoPosition(x, y, rot);
+
+                if (t < 1) {
+                    noMotionRaf = requestAnimationFrame(tick);
+                } else {
+                    noMotionRaf = null;
+                }
+            };
+
+            noMotionRaf = requestAnimationFrame(tick);
+        }
+
         function updateCardForOkScale() {
+            const isMobileLayout = window.matchMedia("(max-width: 700px)").matches;
+            if (isMobileLayout) {
+                // Let the media-query CSS fully control size on small screens.
+                mainCard.style.maxWidth = "";
+                mainCard.style.width = "";
+                buttonRow.style.width = "";
+                buttonRow.style.minHeight = "";
+                return;
+            }
+
             const extraGrow = Math.max(0, okScale - 1);
-            const dynamicWidth = Math.min(980, 760 + extraGrow * 180);
-            const rowWidth = Math.min(860, 560 + extraGrow * 160);
-            const rowHeight = Math.min(420, 190 + extraGrow * 110);
+            const dynamicWidth = Math.min(940, 760 + extraGrow * 120);
+            const rowWidth = Math.min(760, 560 + extraGrow * 90);
+            const rowHeight = Math.min(300, 190 + extraGrow * 45);
             mainCard.style.maxWidth = `${dynamicWidth}px`;
             mainCard.style.width = `min(97vw, ${dynamicWidth}px)`;
             buttonRow.style.width = `min(96vw, ${rowWidth}px)`;
@@ -1077,28 +1147,29 @@
             noMoveStep += 1;
             const viewRect = cardPrompt.getBoundingClientRect();
             const noRect = noBtn.getBoundingClientRect();
-            const maxX = Math.max(28, (viewRect.width / 2 - noRect.width / 2) - 24);
+            const safeMarginX = Math.max(34, noRect.width * 1.05);
+            const safeMarginTop = 28;
+            const safeMarginBottom = 30;
+            const maxX = Math.max(14, (viewRect.width / 2 - noRect.width / 2) - safeMarginX);
 
-            const anchorY = viewRect.height * 0.62;
-            const roomUp = Math.max(20, anchorY - noRect.height / 2 - 18);
-            const roomDown = Math.max(20, viewRect.height - anchorY - noRect.height / 2 - 20);
-            const maxY = Math.max(22, Math.min(roomUp, roomDown));
+            const anchorY = viewRect.height * 0.66;
+            const roomUp = Math.max(12, anchorY - noRect.height / 2 - safeMarginTop);
+            const roomDown = Math.max(12, viewRect.height - anchorY - noRect.height / 2 - safeMarginBottom);
+            const maxY = Math.max(10, Math.min(roomUp, roomDown));
 
             const progress = Math.min(1, Math.max(0, (clickCount - 2) / 8));
-            const radiusX = Math.min(maxX, 28 + progress * (maxX * 0.92));
-            const radiusY = Math.min(maxY, 16 + progress * (maxY * 0.86));
+            const radiusX = Math.min(maxX, 14 + progress * (maxX * 0.72));
+            const radiusY = Math.min(maxY, 8 + progress * (maxY * 0.66));
 
-            const angle = noMoveStep * 2.3999632297 + (Math.random() - 0.5) * 0.36;
+            const angle = noMoveStep * 2.3999632297 + (Math.random() - 0.5) * 0.22;
             const rawX = Math.cos(angle) * radiusX;
             const rawY = Math.sin(angle) * radiusY;
 
             const offsetX = Math.max(-maxX, Math.min(maxX, rawX));
             const offsetY = Math.max(-roomUp, Math.min(roomDown, rawY));
-            const rotation = -7 + Math.random() * 14;
+            const rotation = -5 + Math.random() * 10;
 
-            noBtn.style.setProperty("--no-x", `${offsetX.toFixed(1)}px`);
-            noBtn.style.setProperty("--no-y", `${offsetY.toFixed(1)}px`);
-            noBtn.style.setProperty("--no-rot", `${rotation.toFixed(1)}deg`);
+            animateNoTo(offsetX, offsetY, rotation);
         }
 
         function activateNoFloatingMode() {
@@ -1373,6 +1444,7 @@
 
         startAmbient();
         setupNoButtonNervous();
+        setNoPosition(0, 0, 0);
         showMessage(introMessage.text);
         setMessageGif(introMessage.gif, introMessage.gifAlt);
         updateCardForOkScale();
@@ -1415,7 +1487,7 @@
             // and grow OK on each of those clicks (keeps position unchanged).
             if (clickCount <= 5) {
                 // Shrink moderately so button stays readable and less jarring.
-                const noScale = Math.max(0.4, 1 - 0.11 * clickCount);
+                const noScale = Math.max(0.55, 1 - 0.1 * clickCount);
                 setScale(noBtn, noScale);
 
                 // OK grows on each No click up to the 5th
@@ -1434,6 +1506,10 @@
 
             // On the 10th click, finalize: hide/move No away and emphasize OK centered
             if (clickCount === 10) {
+                if (noMotionRaf) {
+                    cancelAnimationFrame(noMotionRaf);
+                    noMotionRaf = null;
+                }
                 noBtn.classList.remove("nervous");
                 noBtn.classList.add("vanish");
                 if (cardPrompt) {
