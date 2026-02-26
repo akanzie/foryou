@@ -610,6 +610,14 @@
             justify-content: center;
             font-size: 100px;
         }
+        
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+            display: block;
+        }
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
@@ -701,7 +709,7 @@
 
                 <div class="hero-photo" data-aos="zoom-in" data-aos-delay="300">
                     <div class="photo-frame">
-                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop" 
+                        <img src="images/0.png" 
                              id="crushPhoto" alt="Crush">
                     </div>
                 </div>
@@ -787,7 +795,7 @@
                 </p>
 
                 <div class="cert-signature" id="certSignature">
-                    <span id="yourName">Bạn</span><br>
+                    <span id="certSignerName">Bạn</span><br>
                     <span style="font-size: 14px; font-family: 'Open Sans';">Chủ tịch Hội Đồng Tương Tư</span>
                 </div>
 
@@ -816,7 +824,7 @@
     <!-- FOOTER -->
     <footer>
         <p class="footer-quote" data-aos="fade-up">
-            "Mọi kỷ lục trên thế giới đều có thể bị phá vỡ... ngoại trừ việc anh thích em."
+            "Hội đồng kiểm định lưu ý: Kỷ lục này không có thời hạn hết hạn và không thể chuyển nhượng."
         </p>
         <div class="footer-info">
             © 2025 Crush World Records Ltd. — OFFICIALLY AMAZING
@@ -828,13 +836,15 @@
         <div class="modal-content">
             <span class="modal-close" onclick="closeCupModal()">&times;</span>
             <h3 style="color: var(--navy); margin-bottom: 20px;">🏆 Cúp Chính Thức</h3>
-            <div class="qr-code">📱</div>
+            <div class="qr-code">
+                <img src="images/14287.jpg" alt="QR Code">
+            </div>
             <p style="font-weight: 700; margin-bottom: 15px;">Địa điểm bàn giao:</p>
             <p id="cupPlace" style="font-size: 18px; color: var(--gold); margin-bottom: 20px;">
-                Quán Trà Sữa Yêu Thích
+                Phê la
             </p>
             <p style="color: #666; margin-bottom: 20px;">
-                Cúp này là trà sữa size L + topping full nhé! Khi nào em rảnh? 😏
+                Cúp này là Ô long nhài sữa size L + full topping nhé! Khi nào em rảnh? 😏
             </p>
             <button class="cta-button" style="width: 100%;" onclick="closeCupModal()">Đóng</button>
         </div>
@@ -865,17 +875,22 @@
         // ===== INITIALIZATION =====
         const urlParams = new URLSearchParams(window.location.search);
         const crushName = urlParams.get('name') || 'Mỹ Hòa';
-        const yourName = urlParams.get('from') || 'Bạn';
+        const yourName = urlParams.get('from') || 'tui';
+        const certSignerName = urlParams.get('signer') || 'Kiệt';
         const recordDate = urlParams.get('date') || new Date().toLocaleDateString('vi-VN');
 
         // Set names
         document.getElementById('crushName').textContent = crushName;
         document.getElementById('certCrushName').textContent = crushName;
-        document.getElementById('yourName').textContent = yourName;
+        const yourNameElement = document.getElementById('yourName');
+        if (yourNameElement) {
+            yourNameElement.textContent = yourName;
+        }
+        document.getElementById('certSignerName').textContent = certSignerName;
         document.getElementById('certDateValue').textContent = recordDate;
 
         // Generate random record ID
-        const recordId = `LOVE-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9999) + 1000)}`;
+        const recordId = `LOVE-2025-${String(Math.floor(Math.random() * 9999) + 1000)}`;
         document.getElementById('recordId').textContent = recordId;
 
         // Records Data
@@ -883,7 +898,7 @@
             {
                 icon: '😍',
                 title: 'Người sở hữu nụ cười gây sát thương diện rộng nhất hành tinh',
-                description: `Chỉ cần một nụ cười của ${crushName} là khiến tim ${yourName} rối loạn nhịp ngay lập tức ở mức 180 bpm chỉ trong 0.2 giây.`,
+                description: `Chỉ cần một nụ cười của ${crushName} là khiến tim ${yourName} loạn nhịp ngay lập tức ở mức 180 bpm chỉ trong 0.2 giây.`,
                 stat: '📈 Tăng 900% nhịp tim so với mức bình thường – kỷ lục chưa có đối thủ!'
             },
             {
@@ -1036,7 +1051,7 @@
                 const url = `${window.location.origin}${window.location.pathname}?name=${crushName}&from=${yourName}`;
                 const copyText = `${shareText}\n\n${url}`;
                 navigator.clipboard.writeText(copyText);
-                alert('Link đã được copy! Chia sẻ với crush nhe 😘');
+                alert('Link đã được copy! Chia sẻ với mọi người nhe 😘');
             }
         });
 
